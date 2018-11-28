@@ -1,5 +1,4 @@
 var unorm = require('unorm')
-var assert = require('assert')
 var pbkdf2 = require('react-native-crypto').pbkdf2Sync
 var createHash = require('react-native-crypto').createHash
 var randomBytes = require('react-native-randombytes').randomBytes
@@ -21,13 +20,15 @@ function mnemonicToEntropy(mnemonic, wordlist) {
   wordlist = wordlist || DEFAULT_WORDLIST
 
   var words = mnemonic.split(' ')
-  assert(words.length % 3 === 0, 'Invalid mnemonic')
+  if(words.length % 3 !== 0) 
+    throw 'Invalid mnemonic'
 
   var belongToList = words.every(function(word) {
     return wordlist.indexOf(word) > -1
   })
 
-  assert(belongToList, 'Invalid mnemonic')
+  if(!belongToList)
+    throw 'Invalid mnemonic'
 
   // convert word indices to 11 bit binary strings
   var bits = words.map(function(word) {
@@ -47,7 +48,8 @@ function mnemonicToEntropy(mnemonic, wordlist) {
   var entropyBuffer = new Buffer(entropyBytes)
   var newChecksum = checksumBits(entropyBuffer)
 
-  assert(newChecksum === checksum, 'Invalid mnemonic checksum')
+  if(newChecksum !== checksum)
+    throw 'Invalid mnemonic checksum'
 
   return entropyBuffer.toString('hex')
 }
